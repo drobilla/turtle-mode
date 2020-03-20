@@ -114,7 +114,8 @@
                   ;; Beginning of buffer, no indentation
                   0)
 
-                 ((looking-at "^<.*>$")
+                 ((or (looking-at "^<.*>$")
+                      (looking-at "^[a-zA-Z]?[a-zA-Z0-9\-_]*:[a-zA-Z][a-zA-Z0-9\-_]*$"))
                   ;; Start of a resource description, increase indentation
                   (+ (current-indentation) tab-width))
 
