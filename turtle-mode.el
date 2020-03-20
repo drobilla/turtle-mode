@@ -109,7 +109,7 @@
         (t
          ;; Otherwise, look at the previous line
          (save-excursion
-           (forward-line -1) ; Look at the previous line
+           (forward-line -1)
            (cond ((bobp)
                   ;; Beginning of buffer, no indentation
                   0)
@@ -123,10 +123,21 @@
                   ;; End of a resource description or directive, no indentation
                   0)
 
-                 ((or (looking-at ".*;$")
-                      (looking-at ".*,$"))
-                  ;; Continuation of properties, use the same indentation
-                  (current-indentation))
+                 ((looking-at ".*;$")
+                  ;; Continuation of properties
+                  (let ((indentation (current-indentation)))
+                    (forward-line -1)
+                    (if (looking-at ".*,$")
+                        (- indentation tab-width) ; Outdent earlier comma
+                      indentation)))
+
+                 ((looking-at ".*,$")
+                  ;; Continuation of property values
+                  (let ((indentation (current-indentation)))
+                    (forward-line -1)
+                    (if (looking-at ".*,$")
+                        indentation ; Not the first, stay at this level
+                      (+ indentation tab-width)))) ; First comma, indent
 
                  ((looking-at ".*\\[$")
                   ;; Start of an anonymous node, increase indentation
