@@ -110,42 +110,41 @@
          ;; Otherwise, look at the previous line
          (save-excursion
            (forward-line -1)
-           (cond ((bobp)
-                  ;; Beginning of buffer, no indentation
-                  0)
+           (let ((indentation (current-indentation)))
+             (cond ((bobp)
+                    ;; Beginning of buffer, no indentation
+                    0)
 
-                 ((or (looking-at "^<.*>$")
-                      (looking-at "^[a-zA-Z]?[a-zA-Z0-9\-_]*:[a-zA-Z][a-zA-Z0-9\-_]*$"))
-                  ;; Start of a resource description, increase indentation
-                  (+ (current-indentation) tab-width))
+                   ((or (looking-at "^<.*>$")
+                        (looking-at "^[a-zA-Z]?[a-zA-Z0-9\-_]*:[a-zA-Z][a-zA-Z0-9\-_]*$"))
+                    ;; Start of a resource description, increase indentation
+                    (+ indentation tab-width))
 
-                 ((looking-at ".*\\.$")
-                  ;; End of a resource description or directive, no indentation
-                  0)
+                   ((looking-at ".*\\.$")
+                    ;; End of a resource description or directive, no indentation
+                    0)
 
-                 ((looking-at ".*;$")
-                  ;; Continuation of properties
-                  (let ((indentation (current-indentation)))
+                   ((looking-at ".*;$")
+                    ;; Continuation of properties
                     (forward-line -1)
                     (if (looking-at ".*,$")
                         (- indentation tab-width) ; Outdent earlier comma
-                      indentation)))
+                      indentation))
 
-                 ((looking-at ".*,$")
-                  ;; Continuation of property values
-                  (let ((indentation (current-indentation)))
+                   ((looking-at ".*,$")
+                    ;; Continuation of property values
                     (forward-line -1)
                     (if (looking-at ".*,$")
                         indentation ; Not the first, stay at this level
-                      (+ indentation tab-width)))) ; First comma, indent
+                      (+ indentation tab-width))) ; First comma, indent
 
-                 ((looking-at ".*\\[$")
-                  ;; Start of an anonymous node, increase indentation
-                  (+ (current-indentation) tab-width))
+                   ((looking-at ".*\\[$")
+                    ;; Start of an anonymous node, increase indentation
+                    (+ indentation tab-width))
 
-                 (t
-                  ;; Otherwise, use the same indentation
-                  (current-indentation)))))))
+                   (t
+                    ;; Otherwise, use the same indentation
+                    indentation)))))))
 
 
 (defun turtle-indent-line ()
